@@ -6,7 +6,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.post("/webhook", (req, res) => {
   const reply_token = req.body.events[0].replyToken;
-  const iduser = req.body.events[0].source.userId;
+  const iduser = req.body.events[0];
   reply(reply_token, iduser);
   res.sendStatus(200);
 });
@@ -18,7 +18,6 @@ function reply(reply_tokens, idsuser) {
   };
   let body = JSON.stringify({
     replyToken: reply_tokens,
-    idsuser,
     messages: [
       {
         type: "text",
