@@ -2,26 +2,30 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
 const app = express();
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
 app.post("/webhook", (req, res) => {
-  const reply_token = req.body.events[0].replyToken;
-  const iduser = req.body.events[0].source.userId;
-  reply(reply_token, iduser);
+  const lineevent = req.body.events[0];
+  if (lineevent === undefined) return res.sendStatus(200);
+  console.log(lineevent);
+  reply(lineevent);
   res.sendStatus(200);
 });
-function reply(reply_tokens, idsuser) {
+
+const reply = (e) => {
   let headers = {
     "Content-Type": "application/json",
     Authorization:
       "Bearer O/lEacPcXVsvQwN6JpsAFp72N4dNdSzeF9PqGhRZxILm2iYVo07PtAkOpBdmtH+5og/K1sU6XhlUQuPVmWDbyCXhxw4RfL2h77yuXxHiBEHRk+p9TGvV+qsDj59Vc3ZGtNAJPRuz5iNca2BX/Ugu4wdB04t89/1O/w1cDnyilFU=",
   };
   let body = JSON.stringify({
-    replyToken: reply_tokens,
+    replyToken: e.replyToken,
     messages: [
       {
         type: "text",
-        text: `userId: ${idsuser}`,
+        text: `userId: ${e.source.userId}`,
       },
       {
         type: "text",
@@ -30,6 +34,12 @@ function reply(reply_tokens, idsuser) {
     ],
   });
   console.log({ headers, body });
+  if (e.message.text === "ลงทะเบียน") {
+    post(headers, body);
+  }
+};
+
+const post = (headers, body) => {
   request.post(
     {
       url: "https://api.line.me/v2/bot/message/reply",
@@ -40,7 +50,8 @@ function reply(reply_tokens, idsuser) {
       console.log("status = " + res.statusCode);
     }
   );
-}
-app.listen(5001, function () {
-  console.log(`Server Listen on port 5001`);
+};
+
+app.listen(5000, function () {
+  console.log(`Server Listen on port 5000`);
 });
